@@ -54,6 +54,7 @@ export class DriversGateway
     const { routeId } = joinRouteDto;
     console.log(DriverEvent.JOIN_ROUTE, joinRouteDto);
     client.join(routeId);
+    client.emit(DriverEvent.JOINED_ROUTE, routeId);
   }
 
   @SubscribeMessage(DriverEvent.LEAVE_ROUTE)
@@ -64,6 +65,7 @@ export class DriversGateway
     const { routeId } = leaveRouteDto;
     console.log(DriverEvent.LEAVE_ROUTE, leaveRouteDto);
     client.leave(routeId);
+    client.emit(DriverEvent.LEAVED_ROUTE, routeId);
   }
 
   @SubscribeMessage(DriverEvent.START_ROUTE)
