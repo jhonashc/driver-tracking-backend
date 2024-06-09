@@ -9,10 +9,16 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import {
+  JoinRouteDto,
+  LeaveRouteDto,
+  LocationUpdateDto,
+  StartRouteDto,
+} from './dtos';
+
 import { DriverEvent } from './enums/drivers.enum';
 
 import { DriversService } from './drivers.service';
-import { JoinRouteDto, LeaveRouteDto } from './dtos';
 
 @WebSocketGateway({ cors: true, namespace: 'drivers' })
 export class DriversGateway
@@ -58,5 +64,19 @@ export class DriversGateway
     const { routeId } = leaveRouteDto;
     console.log(DriverEvent.LEAVE_ROUTE, leaveRouteDto);
     client.leave(routeId);
+  }
+
+  @SubscribeMessage(DriverEvent.START_ROUTE)
+  handleStartRoute(@MessageBody() startRouteDto: StartRouteDto) {
+    const { routeId, latLng } = startRouteDto;
+    console.log(DriverEvent.START_ROUTE, startRouteDto);
+    this.server.to(routeId).emit(DriverEvent.ROUTE_STARTED, latLng);
+  }
+
+  @SubscribeMessage(DriverEvent.LOCATION_UPDATE)
+  handleLocationUpdate(@MessageBody() locationUpdateDto: LocationUpdateDto) {
+    const { routeId, latLng } = locationUpdateDto;
+    console.log(DriverEvent.LOCATION_UPDATE, locationUpdateDto);
+    this.server.to(routeId).emit(DriverEvent.BROADCAST_LOCATION, latLng);
   }
 }
