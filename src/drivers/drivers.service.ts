@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import crypto from 'crypto';
 
 import { ConnnectedUser, User } from './interfaces/drivers.interface';
 
@@ -12,7 +11,7 @@ export class DriversService {
     // TODO: Get user from database
     const user: User = {
       id: userId,
-      username: `user-${crypto.randomUUID()}`,
+      username: `user-${Math.random()}`,
     };
 
     this.connectedClients[userId] = {
