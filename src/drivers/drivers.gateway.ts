@@ -37,12 +37,15 @@ export class DriversGateway
       return;
     }
 
+    console.log('Client connected', client.id);
+
     // TODO: Get userId from token
     this.driversService.addClient(userId, client);
   }
 
   handleDisconnect(client: Socket): void {
     const { userId } = client.handshake.auth;
+    console.log('Client diconnected', client.id);
     this.driversService.removeClient(userId);
   }
 
@@ -53,7 +56,7 @@ export class DriversGateway
   ) {
     const { routeId } = joinRouteDto;
     console.log(DriverEvent.JOIN_ROUTE, joinRouteDto);
-    client.join(routeId);
+    client.join(`route-${routeId}`);
     client.emit(DriverEvent.JOINED_ROUTE, routeId);
   }
 
@@ -64,7 +67,7 @@ export class DriversGateway
   ) {
     const { routeId } = leaveRouteDto;
     console.log(DriverEvent.LEAVE_ROUTE, leaveRouteDto);
-    client.leave(routeId);
+    client.leave(`route-${routeId}`);
     client.emit(DriverEvent.LEAVED_ROUTE, routeId);
   }
 
@@ -72,13 +75,15 @@ export class DriversGateway
   handleStartRoute(@MessageBody() startRouteDto: StartRouteDto) {
     const { routeId, latLng } = startRouteDto;
     console.log(DriverEvent.START_ROUTE, startRouteDto);
-    this.server.to(routeId).emit(DriverEvent.ROUTE_STARTED, latLng);
+    this.server.to(`route-${routeId}`).emit(DriverEvent.ROUTE_STARTED, latLng);
   }
 
   @SubscribeMessage(DriverEvent.LOCATION_UPDATE)
   handleLocationUpdate(@MessageBody() locationUpdateDto: LocationUpdateDto) {
     const { routeId, latLng } = locationUpdateDto;
     console.log(DriverEvent.LOCATION_UPDATE, locationUpdateDto);
-    this.server.to(routeId).emit(DriverEvent.BROADCAST_LOCATION, latLng);
+    this.server
+      .to(`route-${routeId}`)
+      .emit(DriverEvent.BROADCAST_LOCATION, latLng);
   }
 }
